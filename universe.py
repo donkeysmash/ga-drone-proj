@@ -41,10 +41,8 @@ class Universe:
       self.drones.append(drone)
 
   def gen_solutions(self):
-    self.routes = []
     for drone in self.drones:
-      route = drone.fly_to_goal(self.spaces)
-      self.routes.append(route)
+      drone.fly_to_goal(self)
 
   def compute_score(self):
     pass

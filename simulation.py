@@ -17,6 +17,7 @@ def run_simulation():
 
   universe = Universe(limit_x, limit_y, limit_z, starting_cube, goal_cube, maximum_drone_per_box)
   universe.init_drones(num_drones)
+  universe.gen_solutions()
 
 if __name__ == '__main__':
   run_simulation()

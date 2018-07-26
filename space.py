@@ -1,6 +1,15 @@
 from enum import Enum
 from random import randint
 
+
+def check_bounds(input, upper, lower):
+  for i in range(3):
+    if input[i] >= upper[i]:
+      return False
+    elif input[i] < lower[i]:
+      return False
+  return True
+
 class SpaceType(Enum):
   START = 'START'
   GOAL = 'GOAL'
@@ -13,20 +22,19 @@ class Space:
     self.y = y
     self.z = z
 
-  def next_one(self, lower_limits, upper_limits):
+  def next_one(self, universe):
     is_done = False
+    lower_limit = [0, 0, 0]
+    upper_limit = [universe.x_size, universe.y_size, universe.z_size]
+    current = []
     while not is_done:
       current = [self.x, self.y, self.z]
-      x = randint(0, 2)
-      y = randint(0, 1)
-      current[x] = current[x] - 1 if y == 0 else current[x] + 1
-
-
-
-
-
+      i = randint(0, 2)
+      operator = 1 if randint(0,1) == 1 else -1
+      current[i] = current[i] + operator
+      if check_bounds(current, upper_limit, lower_limit):
+        is_done = True
     return current
 
-
-
-
+  def make_pprint(self):
+    return '{0} {1} {2}'.format(self.x, self.y, self.z)
