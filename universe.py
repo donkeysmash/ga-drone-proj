@@ -44,8 +44,14 @@ class Universe:
     for drone in self.drones:
       drone.fly_to_goal(self)
 
+  ## TODO get all solutions and sort them and pick top two
+    ## TODO generate 48
+      ## with applying P_c and P_m
+
   def compute_score(self):
-    pass
+    cost = 0
+    for drone in self.drones:
+      cost = cost + len(drone.flying_route)
 
 
 

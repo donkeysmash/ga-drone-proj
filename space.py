@@ -22,6 +22,9 @@ class Space:
     self.y = y
     self.z = z
 
+  def __repr__(self):
+    return 'Space: {0} {1} {2}'.format(self.x, self.y, self.z)
+
   def next_one(self, universe):
     is_done = False
     lower_limit = [0, 0, 0]
@@ -35,6 +38,21 @@ class Space:
       if check_bounds(current, upper_limit, lower_limit):
         is_done = True
     return current
+
+
+  def next_one_only_increment(self, universe):
+    is_done = False
+    lower_limit = [0, 0, 0]
+    upper_limit = [universe.x_size, universe.y_size, universe.z_size]
+    current = []
+    while not is_done:
+      current = [self.x, self.y, self.z]
+      i = randint(0, 2)
+      current[i] = current[i] + 1
+      if check_bounds(current, upper_limit, lower_limit):
+        is_done = True
+    return current
+
 
   def make_pprint(self):
     return '{0} {1} {2}'.format(self.x, self.y, self.z)
