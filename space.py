@@ -16,7 +16,7 @@ class SpaceType(Enum):
   NORMAL = 'NORMAL'
 
 class Space:
-  def __init__(self, x, y, z, space_type):
+  def __init__(self, x, y, z, space_type = SpaceType.NORMAL):
     self.space_type = space_type
     self.x = x
     self.y = y

@@ -39,3 +39,9 @@ class Drone:
         next_block_address = last_block.next_one(universe)
         next_space = universe.spaces[next_block_address[0]][next_block_address[1]][next_block_address[2]]
         self.flying_route.append(next_space)
+
+
+  def get_i_in_flying_route(self, i):
+    if i < 0 or i >= len(self.flying_route):
+      return None
+    return self.flying_route[i]

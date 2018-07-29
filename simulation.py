@@ -17,8 +17,11 @@ def run_simulation():
 
   universe = Universe(limit_x, limit_y, limit_z, starting_cube, goal_cube, maximum_drone_per_box)
   for i in range(num_generation):
-    universe.init_drones(num_drones)
-    universe.gen_solutions()
+    for j in range(num_population):
+      universe.reset()
+      universe.init_drones(num_drones)
+      universe.gen_solutions()
+      universe.compute_cost_and_collision()
 
 
 if __name__ == '__main__':

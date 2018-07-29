@@ -1,27 +1,24 @@
+from collections import Counter
 from space import Space, SpaceType
 from drone import DroneFactory
 
-def check_coordinate(x, y, z, checker):
-  return checker['x'] == x and checker['y'] == y and checker['z'] == z
 
-def create_spaces(x, y, z, goal_cube, starting_cube):
+def create_spaces_2(x, y, z):
   spaces = []
   for _x in range(x):
     y_spaces = []
     for _y in range(y):
       z_spaces = []
       for _z in range(z):
-        if check_coordinate(_x, _y, _z, starting_cube):
-          space_type = SpaceType.START
-        elif check_coordinate(_x, _y, _z, goal_cube):
-          space_type = SpaceType.GOAL
-        else:
-          space_type = SpaceType.NORMAL
-        space = Space(_x, _y, _z, space_type)
+        space = Space(_x, _y, _z)
         z_spaces.append(space)
       y_spaces.append(z_spaces)
     spaces.append(y_spaces)
   return spaces
+
+def set_start_and_goal(spaces, starting_cube, goal_cube):
+  spaces[starting_cube['x']][starting_cube['y']][starting_cube['z']].space_type = SpaceType.START
+  spaces[goal_cube['x']][goal_cube['y']][goal_cube['z']].space_type = SpaceType.GOAL
 
 class Universe:
   def __init__(self, x, y, z, starting_cube, goal_cube, max_drone_per_box):
@@ -29,13 +26,19 @@ class Universe:
     self.y_size = y
     self.z_size = z
     self.max_drone_per_box = max_drone_per_box
-    self.spaces = create_spaces(x, y, z, goal_cube, starting_cube)
+    self.spaces = create_spaces_2(x, y, z)
+    set_start_and_goal(self.spaces, starting_cube, goal_cube)
     self.drone_factory = DroneFactory()
     self.starting_cube = self.spaces[starting_cube['x']][starting_cube['y']][starting_cube['z']]
     self.goal_cube = self.spaces[goal_cube['x']][goal_cube['y']][goal_cube['z']]
 
-  def init_drones(self, num_drones):
+  def reset(self):
     self.drones = []
+    self.cost = 0
+    self.score = 0
+    self.num_collision = 0
+
+  def init_drones(self, num_drones):
     for _ in range(num_drones):
       drone = self.drone_factory.create_drone(self.starting_cube)
       self.drones.append(drone)
@@ -48,14 +51,22 @@ class Universe:
     ## TODO generate 48
       ## with applying P_c and P_m
 
-  def compute_score(self):
-    cost = 0
+  def compute_cost_and_collision(self):
+    max_route_length = 0
     for drone in self.drones:
-      cost = cost + len(drone.flying_route)
+      route_length = len(drone.flying_route)
+      max_route_length = max(max_route_length, route_length)
+      self.cost = self.cost + route_length
 
-
-
-
+    for i in range(max_route_length):
+      time_slice = [None] * len(self.drones)
+      for x in range(len(self.drones)):
+        drone = self.drones[x]
+        time_slice[x] = drone.get_i_in_flying_route(i)
+      counts = dict(Counter(time_slice))
+      for k, v in counts.items():
+        if k is not None and k.space_type == SpaceType.NORMAL and v > self.max_drone_per_box:
+          self.num_collision += 1
 
 
 
