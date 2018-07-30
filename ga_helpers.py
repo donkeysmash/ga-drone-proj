@@ -3,10 +3,9 @@ class Generation:
   def __init__(self, gen_id, prev_gen = None):
     self.gen_id = gen_id
     self.num_population = 0
-    # self.best = None if prev_gen is None else prev_gen.best
-    # self.second_best = None if prev_gen is None else prev_gen.second_best
-    self.best = None
-    self.second_best = None
+    self.best = None if prev_gen is None else prev_gen.best
+    self.second_best = None if prev_gen is None else prev_gen.second_best
+    print('\ngen{0} started'.format(gen_id))
 
   def add_population(self, solution):
     self.num_population += 1
@@ -31,7 +30,8 @@ class Generation:
 
 
 class Solution:
-  def __init__(self, score, drones):
+  def __init__(self, score, drones, num_collision):
+    print('   solution emitted with score:{0}, collision:{1}'.format(score, num_collision))
     self.score = score
     self.drones = drones
 
@@ -41,5 +41,6 @@ class GeneticAlgorithm:
     self.generations = []
 
   def add_a_generation(self, generation):
-    print('g{0}'.format(generation.gen_id))
+    print('gen{0} completed'.format(generation.gen_id))
+    print('top two scores:{0}, {1}'.format(generation.best.score, generation.second_best.score))
     self.generations.append(generation)

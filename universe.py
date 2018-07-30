@@ -42,6 +42,15 @@ def crossover(p, q, alpha, universe):
   new_flying_route = head + glue(head[-1], tail[0], universe) + tail
   return new_flying_route
 
+def crossover2(p, q, alpha, universe, num_drones):
+  # this function creates a new set of drones
+  # new_set = [top (alpha * num_drones) from p] + [top ((1-alpha) * num_drones) from q]
+  p.sort(key=lambda drone: len(drone.flying_route))
+  q.sort(key=lambda drone: len(drone.flying_route))
+  x = floor(num_drones * alpha)
+  new_set = p[0:x] + q[x:]
+  return new_set
+
 class Universe:
   def __init__(self, x, y, z, starting_cube, goal_cube, max_drone_per_box, p_c, p_m, alpha):
     self.x_size = x
@@ -79,7 +88,8 @@ class Universe:
     # consider each drone to be each gene
     # then drone from p and q could do cross over
     # glueing is necessary in such case
-    #  glueing is also random
+    #  glueing is also random --> this makes each generation worse than the last one
+    #                             to solve this problem, we implemented gen_children2
     # mutation is also done for each drone
     child = p if random() < 0.5 else q
 
@@ -93,6 +103,20 @@ class Universe:
         child.drones[i].mutate(self)
 
     self.drones = child.drones
+
+
+  def gen_children2(self, p, q, num_drones):
+    child = p if random() < 0.5 else q
+
+    if random() < self.p_c:
+      child.drones = crossover2(p.drones, q.drones, self.alpha, self, num_drones)
+
+    for i in range(len(child.drones)):
+      if random() < self.p_m:
+        child.drones[i].mutate(self)
+
+    self.drones = child.drones
+
 
   def compute_score(self, collision_penalty):
     return self.cost + (self.num_collision * collision_penalty)
