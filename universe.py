@@ -1,7 +1,8 @@
 from collections import Counter
 from space import Space, SpaceType
 from drone import DroneFactory
-
+from random import random, randrange
+from math import floor
 
 def create_spaces_2(x, y, z):
   spaces = []
@@ -20,11 +21,35 @@ def set_start_and_goal(spaces, starting_cube, goal_cube):
   spaces[starting_cube['x']][starting_cube['y']][starting_cube['z']].space_type = SpaceType.START
   spaces[goal_cube['x']][goal_cube['y']][goal_cube['z']].space_type = SpaceType.GOAL
 
+def glue(src, dst, universe):
+  current = src
+  glues = []
+  while True:
+    if current == dst:
+      return glues
+    next_block_address = current.next_one(universe)
+    next_space = universe.spaces[next_block_address[0]][next_block_address[1]][next_block_address[2]]
+    current = next_space
+    glues.append(next_space)
+
+def crossover(p, q, alpha, universe):
+  p_routes = p.flying_route
+  q_routes = q.flying_route
+  p_idx = floor(len(p_routes) * alpha)
+  q_idx = floor(len(q_routes) * alpha)
+  head = p_routes[0:p_idx]
+  tail = q_routes[q_idx:]
+  new_flying_route = head + glue(head[-1], tail[0], universe) + tail
+  return new_flying_route
+
 class Universe:
-  def __init__(self, x, y, z, starting_cube, goal_cube, max_drone_per_box):
+  def __init__(self, x, y, z, starting_cube, goal_cube, max_drone_per_box, p_c, p_m, alpha):
     self.x_size = x
     self.y_size = y
     self.z_size = z
+    self.p_c = p_c
+    self.p_m = p_m
+    self.alpha = alpha
     self.max_drone_per_box = max_drone_per_box
     self.spaces = create_spaces_2(x, y, z)
     set_start_and_goal(self.spaces, starting_cube, goal_cube)
@@ -35,7 +60,6 @@ class Universe:
   def reset(self):
     self.drones = []
     self.cost = 0
-    self.score = 0
     self.num_collision = 0
 
   def init_drones(self, num_drones):
@@ -47,9 +71,31 @@ class Universe:
     for drone in self.drones:
       drone.fly_to_goal(self)
 
-  ## TODO get all solutions and sort them and pick top two
-    ## TODO generate 48
-      ## with applying P_c and P_m
+
+  def gen_children(self, p, q):
+    # p and q are Solution
+    # therefore do q.drones or p.drones to get the entire drones
+
+    # consider each drone to be each gene
+    # then drone from p and q could do cross over
+    # glueing is necessary in such case
+    #  glueing is also random
+    # mutation is also done for each drone
+    child = p if random() < 0.5 else q
+
+    for i in range(len(child.drones)):
+      if random() < self.p_c:
+        p_drone = p.drones[i]
+        q_drone = q.drones[i]
+        child.drones[i].flying_route = crossover(p_drone, q_drone, self.alpha, self)
+
+      if random() < self.p_m:
+        child.drones[i].mutate(self)
+
+    self.drones = child.drones
+
+  def compute_score(self, collision_penalty):
+    return self.cost + (self.num_collision * collision_penalty)
 
   def compute_cost_and_collision(self):
     max_route_length = 0

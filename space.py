@@ -39,7 +39,6 @@ class Space:
         is_done = True
     return current
 
-
   def next_one_only_increment(self, universe):
     is_done = False
     lower_limit = [0, 0, 0]
